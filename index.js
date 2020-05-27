@@ -18,6 +18,10 @@ module.exports = class extends window.casthub.module {
                 this.fetchSpotify();
                 setInterval(() => this.fetchSpotify(), 3000);
                 break;
+            case "twitter":
+                this.fetchTwitter();
+                setInterval(() => this.fetchSpotify(), 1000*60);
+                break;
             default:
                 console.log(`${integration} is not supported`);
                 break;
@@ -38,26 +42,26 @@ module.exports = class extends window.casthub.module {
         const filename = 'spotify.json';
 
         try {
-            const data = await window.casthub.fetch({
+            const response = await window.casthub.fetch({
                 integration: 'spotify',
                 method: 'GET',
                 url: 'me/player',
             });
 
-            if (data.item) {
-                let info = {};
+            if (response.item) {
+                let data = {};
 
-                info.title = data.item.name;
-                info.artist = data.item.artists.map(artist => artist.name)[0];
-                info.album = null;
+                data.title = response.item.name;
+                data.artist = response.item.artists.map(artist => artist.name)[0];
+                data.album = null;
 
                 // Find the Album Image.
-                if (data.item.album && data.item.album.images.length) {
-                    const total = data.item.album.images.length;
+                if (response.item.album && response.item.album.images.length) {
+                    const total = response.item.album.images.length;
                     let item = null;
 
                     for (let i = 0; i < total; i++) {
-                        const img = data.item.album.images[i];
+                        const img = response.item.album.images[i];
 
                         // Find the smallest image that's above 100px wide.
                         if ( item === null || ( img.width >= 100 && img.width < item.width )) {
@@ -65,11 +69,39 @@ module.exports = class extends window.casthub.module {
                         }
                     }
 
-                    info.album = item.url;
+                    data.album = item.url;
                 }
 
-                this.sendFileData(filename, info);
+                this.sendFileData(filename, data);
             }
+        } catch (e) {
+            this.sendFileData(filename, {});
+            console.log(e);
+        }
+
+    }
+
+    async fetchTwitter() {
+
+        const filename = 'twitter.json';
+
+        try {
+            let data = {};
+
+            const response = await window.casthub.fetch({
+                integration: 'twitter',
+                method: 'GET',
+                url: 'followers/list',
+            });
+            
+
+            let recentFollowers = response.users.slice(0,5);
+            data.followers = recentFollowers.map(follower => {
+                return follower.screen_name;
+            });
+
+            this.sendFileData(filename, data);
+
         } catch (e) {
             this.sendFileData(filename, {});
             console.log(e);
