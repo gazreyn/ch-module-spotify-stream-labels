@@ -1,0 +1,9 @@
+{
+    "name": "stream-labels",
+    "version": "1.0.0",
+    "main": "index.js",
+    "casthub": {
+        "width": 5,
+        "height": 4
+    }
+}
