@@ -5,6 +5,7 @@
     "casthub": {
         "width": 5,
         "height": 4,
+        "actions": "light",
         "filesystem": {
             "nowPlaying": {
                 "filename": "now_playing",

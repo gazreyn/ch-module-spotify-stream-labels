@@ -6,9 +6,9 @@ module.exports = class extends window.casthub.module {
         super();
 
         this.$header = window.casthub.create('header');
-        this.$header.icon = 'twitch';
-        this.$header.color = '#4b367c';
-        this.$header.innerText = 'Latest Subscribers';
+        this.$header.icon = 'spotify';
+        this.$header.color = '#1db954';
+        this.$header.innerText = 'Now Playing';
         this.addEl(this.$header);
 
     }
