@@ -4,6 +4,12 @@
     "main": "index.js",
     "casthub": {
         "width": 5,
-        "height": 4
+        "height": 4,
+        "filesystem": {
+            "nowPlaying": {
+                "filename": "now_playing",
+                "extension": "json"
+            }
+        }
     }
 }

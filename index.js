@@ -5,41 +5,28 @@ module.exports = class extends window.casthub.module {
     constructor() {
         super();
 
-        this.ws = null;
-        this.connected = false;
+        this.$header = window.casthub.create('header');
+        this.$header.icon = 'twitch';
+        this.$header.color = '#4b367c';
+        this.$header.innerText = 'Latest Subscribers';
+        this.addEl(this.$header);
 
     }
 
-    onConnected() {
-        const { integration } = this.identity;
+    /**
+     * Run any asynchronous code when the Module is mounted to DOM.
+     *
+     * @return {Promise}
+     */
+    async mounted() {
+        await super.mounted();
 
-        switch(integration) {
-            case "spotify":
-                this.fetchSpotify();
-                setInterval(() => this.fetchSpotify(), 3000);
-                break;
-            case "twitter":
-                this.fetchTwitter();
-                setInterval(() => this.fetchSpotify(), 1000*60);
-                break;
-            default:
-                console.log(`${integration} is not supported`);
-                break;
-        }
+        await this.refresh();
 
+        setInterval(() => this.refresh(), 3000);
     }
 
-    sendFileData(filename, data) {
-        let fileObject = {
-            "filename": filename,
-            "data": data
-        }
-        this.ws.send(JSON.stringify(fileObject));
-    }
-
-    async fetchSpotify() {
-
-        const filename = 'spotify.json';
+    async refresh() {
 
         try {
             const response = await window.casthub.fetch({
@@ -72,67 +59,15 @@ module.exports = class extends window.casthub.module {
                     data.album = item.url;
                 }
 
-                this.sendFileData(filename, data);
+                await this.filesystem.set('nowPlaying', data);
+                // Write to file system here
             }
         } catch (e) {
-            this.sendFileData(filename, {});
-            console.log(e);
+            // Write to file system blank object
+            await this.filesystem.set('nowPlaying', {});
+            console.log("Can't find current song from Spotify", e);
         }
 
-    }
-
-    async fetchTwitter() {
-
-        const filename = 'twitter.json';
-
-        try {
-            let data = {};
-
-            const response = await window.casthub.fetch({
-                integration: 'twitter',
-                method: 'GET',
-                url: 'followers/list',
-            });
-            
-
-            let recentFollowers = response.users.slice(0,5);
-            data.followers = recentFollowers.map(follower => {
-                return follower.screen_name;
-            });
-
-            this.sendFileData(filename, data);
-
-        } catch (e) {
-            this.sendFileData(filename, {});
-            console.log(e);
-        }
-
-    }
-
-    /**
-     * Run any asynchronous code when the Module is mounted to DOM.
-     *
-     * @return {Promise}
-     */
-    async mounted() {
-
-        this.connected = await new Promise((resolve) => {
-            const WebSocketClient = window.casthub.libs.ws;
-            this.ws = new WebSocketClient('ws://localhost:32101', [], {
-                backoff: "fibonacci"
-            });
-
-            this.ws.onopen = (event) => {
-                this.onConnected();
-                resolve(true);
-            }
-
-            this.ws.onerror = (event) => {
-                console.log("Not connected!");
-                resolve(false);
-            }
-        });
-        await super.mounted();
     }
 
 };
