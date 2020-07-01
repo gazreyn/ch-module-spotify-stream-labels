@@ -1,5 +1,5 @@
 {
-    "name": "stream-labels",
+    "name": "spotify-labels",
     "version": "1.0.0",
     "main": "index.js",
     "casthub": {
@@ -9,6 +9,10 @@
         "filesystem": {
             "nowPlaying": {
                 "filename": "now_playing",
+                "extension": "txt"
+            },
+            "data": {
+                "filename": "data",
                 "extension": "json"
             }
         }

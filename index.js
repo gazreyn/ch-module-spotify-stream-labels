@@ -59,12 +59,14 @@ module.exports = class extends window.casthub.module {
                     data.album = item.url;
                 }
 
-                await this.filesystem.set('nowPlaying', data);
+                await this.filesystem.set('nowPlaying', `${data.title} - ${data.artist}`);
+                await this.filesystem.set('data', data);
                 // Write to file system here
             }
         } catch (e) {
             // Write to file system blank object
-            await this.filesystem.set('nowPlaying', {});
+            await this.filesystem.set('data', {});
+            await this.filesystem.set('nowPlaying', '');
             console.log("Can't find current song from Spotify", e);
         }
 
